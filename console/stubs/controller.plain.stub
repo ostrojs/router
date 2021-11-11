@@ -1,0 +1,7 @@
+const Controller =  require('~/app/http/controllers/controller');
+
+class {{ class }} extends Controller{
+    //
+}
+
+module.exports = {{ class }}

@@ -1,0 +1,9 @@
+class {{ class }} {
+
+    handle(request, response, next)
+    {
+        next();
+    }
+}
+
+module.exports =  {{ class }}
