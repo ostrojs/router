@@ -2,25 +2,17 @@ const GeneratorCommand = require('@ostro/console/generatorCommand')
 const InvalidArgumentException = require('@ostro/support/exceptions/invalidArgumentException')
 class ControllerMakeCommand extends GeneratorCommand {
 
-    get $signature() {
-        return 'make:controller';
-    }
+    $signature = 'make:controller';
 
-    get $description() {
-        return 'Create a new controller class'
-    };
+    $description = 'Create a new controller class';
 
-    get $options() {
-        return [
+    $options =  [
             this.createOption('--force', 'Create the class even if the controller already exists'),
             this.createOption('-m, --model [model]', 'Generate a resource controller for the given model.'),
             this.createOption('-r, --resource', 'Generate a resource controller class.')
-        ];
-    }
+    ];
 
-    get $type(){
-        return 'Controller';
-    } 
+    $type = 'Controller';
 
     getStub() {
         let $stub = null;

@@ -22,7 +22,7 @@ const middlewares = Object.create(null)
 const controllers = Object.create(null)
 const stacks = []
 class Route {
-    $verbs =  ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'];
+    $verbs = ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'];
 
     constructor(opt = {}) {
         opt = Object.assign({ prefix: '/', suffix: '/', namespace: '', middlewares: [], url: '/', name: '', handle: null, defaults: null }, opt)
@@ -98,11 +98,15 @@ class Route {
     }
 
     match($methods, $uri, $action = null) {
+        $methods = $methods.map(method => method.toUpperCase())
         return this.addRoute($methods, $uri, $action);
     }
 
     middleware(callback) {
-        this.$stack.middlewares.push(callback)
+        if (Array.isArray(callback))
+            this.$stack.middlewares = this.$stack.middlewares.concat(callback)
+        else
+            this.$stack.middlewares.push(callback)
         return this
     }
 
@@ -216,33 +220,32 @@ class Router extends Macroable.extend(RouterContract) {
     getMiddleware(middleware) {
         const middlewareName = middleware
         let params = []
-        if(middleware.includes(':')){
+
+        if (typeof middleware == 'string' && middleware.includes(':')) {
             let splitedMiddleware = middleware.split(':')
             middleware = splitedMiddleware[0]
-            if(typeof splitedMiddleware[1] == 'string'){
+            if (typeof splitedMiddleware[1] == 'string') {
                 params = splitedMiddleware[1].split(',')
             }
 
         }
 
+
+        if (typeof middleware === 'function') {
+            return this.resolveMiddleware(middleware, params)
+        }
+
         if (middlewares[middlewareName]) {
             return middlewares[middlewareName]
         }
-        if (typeof middleware === 'function') {
-            if (IsClass(middleware)) {
-                middleware.prototype.$app = this.$app
-                middlewares[middlewareName] = new middleware(...params)
-            } else {
-                return middleware
-            }
-        }
+
         if (!this[kMiddlewares]['named'][middleware])
             throw new MethodNotAvailable('middleware [{' + middleware + '}] is not available')
         if (!middlewares[middlewareName]) {
             let namedMiddleware = this[kMiddlewares]['named'][middleware]
             if (!Array.isArray(namedMiddleware)) {
 
-                middlewares[middlewareName] = this.resolveMiddleware(namedMiddleware,params)
+                middlewares[middlewareName] = this.resolveMiddleware(namedMiddleware, params)
 
             } else {
                 middlewares[middlewareName] = this[kMiddlewares]['named'][middleware].map(handler => {
@@ -251,7 +254,7 @@ class Router extends Macroable.extend(RouterContract) {
                     return handler
                 }).map(handler => {
 
-                    return this.resolveMiddleware(handler,params)
+                    return this.resolveMiddleware(handler, params)
                 }).filter(data => data);
             }
 
@@ -259,7 +262,7 @@ class Router extends Macroable.extend(RouterContract) {
         return middlewares[middlewareName]
     }
 
-    resolveMiddleware(handler,params) {
+    resolveMiddleware(handler, params) {
 
         if (IsClass(handler)) {
             handler.prototype.$app = this.$app
@@ -277,6 +280,7 @@ class Router extends Macroable.extend(RouterContract) {
 
     createLayer(stack) {
         const self = this
+
         if (typeof stack.handle == 'string') {
             let [controller, callback] = stack.handle.split('::')
             let controllerPath = path.normalize(path.join(path.resolve(stack.namespace), controller))
@@ -293,9 +297,14 @@ class Router extends Macroable.extend(RouterContract) {
             }
             stack.handle = controllers[controllerPath][callback].bind(controllers[controllerPath])
 
+        } else if (Array.isArray(stack.handle)) {
+            let [controller, callback] = stack.handle
+            controller.prototype.$app = this.$app
+            controller = new controller(stack.defaults)
+            stack.handle = controller[callback].bind(controller)
         } else {
             if (IsClass(stack.handle)) {
-                stack.prototype.$app = this.$app
+                stack.handle.prototype.$app = this.$app
                 stack.handle = new stack.handle(stack.defaults)
             }
             if (typeof stack.handle == 'object') {
@@ -404,7 +413,7 @@ class Router extends Macroable.extend(RouterContract) {
             return true
         })
         middlewares.push(exceptionHandler)
-        global.route = (name, params)=> {
+        global.route = (name, params) => {
             return this.route(name, params)
         }
         return composeWith(middlewares)(this.httpContext)
@@ -428,6 +437,14 @@ class Router extends Macroable.extend(RouterContract) {
         return pathToRegexp.compile(currentRoute.$original, { encode: encodeURIComponent })(mParams, { validate: false })
     }
 
+    currentRoute(request) {
+        return this[kLayers].find(route => {
+            if (route.$domain != undefined && request.headers.host != route.$domain)
+                return false
+            return (route.match(request._parsedUrl.pathname) && (route.$methods.indexOf(request.method) > -1))
+        })
+    }
+
     bindToResponse(HttpResponse) {
         let self = this;
 
@@ -436,8 +453,9 @@ class Router extends Macroable.extend(RouterContract) {
         };
     }
 
-    __call(target, method, args) {
-        return (new GroupRoute())[method](...args)
+
+    __get(target, method) {
+        return this.make(new GroupRoute, method)
 
     }
 

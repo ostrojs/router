@@ -1,7 +1,6 @@
 class {{ class }} {
 
-    handle(request, response, next)
-    {
+    handle({ request, response, next })  {
         next();
     }
 }

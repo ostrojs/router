@@ -2,17 +2,11 @@ const GeneratorCommand = require('@ostro/console/generatorCommand')
 
 class MiddlewareMakeCommand extends GeneratorCommand {
 
-    get $signature() {
-        return 'make:middleware';
-    }
+    $signature = 'make:middleware';
 
-    get $description() {
-        return 'Create a new middleware class'
-    };
+    $description =  'Create a new middleware class';
 
-    get $type() {
-        return 'Middleware'
-    };
+    $type =  'Middleware';
 
     getStub() {
         return this.resolveStubPath('/stubs/middleware.stub');

@@ -1,6 +1,6 @@
 const Controller =  require('~/app/http/controllers/controller');
 
-class {{ class }} extends Controller{
+class {{ class }} extends Controller {
     //
 }
 
