@@ -13,7 +13,7 @@ class ExceptionHandler {
     }
 
     terminate(error, { response }, next) {
-        console.log(error)
+        console.error(error)
     }
 }
 
