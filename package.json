@@ -1,14 +1,14 @@
 {
   "name": "@ostro/router",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Router module for OstroJS",
   "main": "router.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@ostro/support": "^1.0.2",
-    "@ostro/contracts": "^1.0.0",
+    "@ostro/support": "^1.0.11",
+    "@ostro/contracts": "^1.0.2",
     "array-flatten": "^3.0.0",
     "lodash.difference": "^4.5.0",
     "path-to-regexp": "^6.2.0"
