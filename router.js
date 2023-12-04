@@ -1,26 +1,23 @@
 require('@ostro/support/helpers')
-const RouterContract = require('@ostro/contracts/router/router')
+const RouterContract = require('@ostro/contracts/router/router');
 const path = require('path');
-const MethodNotAvailable = require('@ostro/support/exceptions/methodNotAvailable')
-const PageNotFoundException = require('@ostro/support/exceptions/pageNotFoundException')
-const InvalidArgumentException = require('@ostro/support/exceptions/invalidArgumentException')
-const InvalidRouteExceptions = require('./exceptions/invalidRouteExceptions')
-const { Macroable } = require('@ostro/support/macro')
-const Layer = require('./layer')
-const { compose, composeWith, urlNormalize } = require('./utils')
-const pathToRegexp = require('path-to-regexp')
-const difference = require('lodash').difference
+const MethodNotAvailable = require('@ostro/support/exceptions/methodNotAvailable');
+const PageNotFoundException = require('@ostro/support/exceptions/pageNotFoundException');
+const InvalidArgumentException = require('@ostro/support/exceptions/invalidArgumentException');
+const InvalidRouteExceptions = require('./exceptions/invalidRouteExceptions');
+const { Macroable } = require('@ostro/support/macro');
+const Layer = require('./layer');
+const { compose, composeWith, urlNormalize } = require('./utils');
+const pathToRegexp = require('path-to-regexp');
 const url = require('url');
-const HttpContext = require('./httpContext')
-const ExceptionHandler = require('./exceptionHandler')
-const kLayers = Symbol('kLayers')
-const kRegexConfig = Symbol('kRegexConfig')
-const kHandlerExtend = Symbol('handlerExtend')
-const kArgumentCustomizer = Symbol('argumentCustomizer')
-const kMiddlewares = Symbol('middlewares')
-const middlewares = Object.create(null)
-const controllers = Object.create(null)
-const stacks = []
+const HttpContext = require('./httpContext');
+const ExceptionHandler = require('./exceptionHandler');
+const kLayers = Symbol('kLayers');
+const kRegexConfig = Symbol('kRegexConfig');
+const kMiddlewares = Symbol('middlewares');
+const middlewares = Object.create(null);
+const controllers = Object.create(null);
+const stacks = [];
 class Route {
     $verbs = ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'];
 
@@ -38,8 +35,8 @@ class Route {
             methods: [],
             defaults: opt.defaults,
             domain: opt.domain
-        }) - 1
-        this.$stack = stacks[this.$currentStack]
+        }) - 1;
+        this.$stack = stacks[this.$currentStack];
     }
 
     get($uri, $action = null) {
@@ -71,15 +68,13 @@ class Route {
     }
 
     redirect($uri, $destination, $status = 302) {
-        return this.any($uri, function({
-            request,
+        return this.any($uri, function ({
             response,
-            next
         }) {
             response.writeHead($status, {
                 Location: $destination
             });
-            response.end()
+            response.end();
         })
     }
 
@@ -98,65 +93,66 @@ class Route {
     }
 
     match($methods, $uri, $action = null) {
-        $methods = $methods.map(method => method.toUpperCase())
+        $methods = $methods.map(method => method.toUpperCase());
         return this.addRoute($methods, $uri, $action);
     }
 
     middleware(callback) {
         if (Array.isArray(callback))
-            this.$stack.middlewares = this.$stack.middlewares.concat(callback)
+            this.$stack.middlewares = this.$stack.middlewares.concat(callback);
         else
-            this.$stack.middlewares.push(callback)
+            this.$stack.middlewares.push(callback);
         return this
     }
 
     prefix(prefix) {
-        this.$stack.prefix = this.$stack.prefix + prefix
+        this.$stack.prefix = this.$stack.prefix + prefix;
         return this
     }
 
     suffix(suffix) {
-        this.$stack.suffix = this.$stack.suffix + suffix
+        this.$stack.suffix = this.$stack.suffix + suffix;
         return this
     }
 
     domain(domain) {
-        this.$stack.domain = domain
-        return this
+        this.$stack.domain = domain;
+        return this;
     }
 
     namespace(namespace) {
-        this.$stack.namespace = this.$stack.namespace + (namespace || '')
-        return this
+        this.$stack.namespace = this.$stack.namespace + (namespace || '');
+        return this;
     }
 
     name(name) {
-        this.$stack.name += name
-        return this
+        this.$stack.name += name;
+        return this;
     }
 
     group(opt = {}, callback) {
         if (typeof opt == 'string') {
-            callback = require(opt)
-            opt = {}
+            callback = require(opt);
+            opt = {};
         } else if (typeof opt == 'function') {
-            callback = opt
-            opt = {}
+            callback = opt;
+            opt = {};
         }
-        let inst = new GroupRoute(opt, this.$stack)
+        let inst = new GroupRoute(opt, this.$stack);
         callback.call(inst, inst);
     }
 
     setDefaults(defaults = {}) {
-        this.$stack.defaults = { ...this.$stack.defaults,
+        this.$stack.defaults = {
+            ...this.$stack.defaults,
             ...defaults
-        }
+        };
     }
 
     addRoute($methods, $uri, $action) {
-        this.$stack.url = $uri
-        this.$stack.methods = $methods
-        this.$stack.handle = $action
+        this.$stack.url = $uri;
+        this.$stack.methods = $methods;
+        this.$stack.handle = $action;
         return this
     }
 
@@ -164,166 +160,160 @@ class Route {
 class GroupRoute extends Macroable {
     opt = {}
     constructor(opt = null, old = {}) {
-        super()
+        super();
 
         if (opt == null && old == null) {
-            return this
+            return this;
         }
-        opt = Object.assign({ prefix: '/', suffix: '/', namespace: '', middleware: [], url: '/', name: '', handle: null, defaults: null }, opt)
-        old = Object.assign({ prefix: '/', suffix: '/', namespace: '', middlewares: [], url: '/', name: '', handle: null, defaults: null }, old)
+        opt = Object.assign({ prefix: '/', suffix: '/', namespace: '', middleware: [], url: '/', name: '', handle: null, defaults: null }, opt);
+        old = Object.assign({ prefix: '/', suffix: '/', namespace: '', middlewares: [], url: '/', name: '', handle: null, defaults: null }, old);
 
         this.opt.prefix = old.prefix + opt.prefix;
         this.opt.suffix = old.suffix + opt.suffix;
-        this.opt.namespace = opt.namespace ? path.join(old.namespace, opt.namespace) : old.namespace
+        this.opt.namespace = opt.namespace ? path.join(old.namespace, opt.namespace) : old.namespace;
         this.opt.middlewares = old.middlewares.concat(opt.middleware);
         this.opt.url = old.url + opt.url;
         this.opt.name = old.name + opt.name;
-        this.opt.handle = null
-        this.opt.defaults = null
-        this.opt.domain = opt.domain || old.domain
+        this.opt.handle = null;
+        this.opt.defaults = null;
+        this.opt.domain = opt.domain || old.domain;
     }
     group(opt, callback) {
         if (typeof this.opt == 'function') {
-            this.opt = {}
+            this.opt = {};
         }
-        let inst = new GroupRoute(opt, this.opt)
+        let inst = new GroupRoute(opt, this.opt);
         callback.call(inst, inst);
     }
 
     __get(target, method) {
-        return this.make(new Route(target.opt), method)
+        return this.make(new Route(target.opt), method);
     }
 }
 
 class Router extends Macroable.extend(RouterContract) {
-    constructor($app = {}, regexConfig = {
-        sensitive: false,
-        strict: false,
-        end: true
-    }, callbackHandler) {
-        super()
-        this.$app = $app
+    constructor($app = {}, regexConfig = { sensitive: false, strict: false, end: true }) {
+        super();
+        this.$app = $app;
         this[kMiddlewares] = {
             default: [],
             named: {},
-        }
+        };
         Object.defineProperty(this, kRegexConfig, {
             value: regexConfig,
             configurable: true,
             enumerable: false,
             writable: true
-        })
-        this.httpContextHandler(HttpContext)
+        });
+        this.httpContextHandler(HttpContext);
 
     }
 
     getMiddleware(middleware) {
-        const middlewareName = middleware
-        let params = []
+        const middlewareName = middleware;
+        let params = [];
 
         if (typeof middleware == 'string' && middleware.includes(':')) {
-            let splitedMiddleware = middleware.split(':')
-            middleware = splitedMiddleware[0]
+            let splitedMiddleware = middleware.split(':');
+            middleware = splitedMiddleware[0];
             if (typeof splitedMiddleware[1] == 'string') {
-                params = splitedMiddleware[1].split(',')
+                params = splitedMiddleware[1].split(',');
             }
-
         }
 
-
         if (typeof middleware === 'function') {
-            return this.resolveMiddleware(middleware, params)
+            return this.resolveMiddleware(middleware, params);
         }
 
         if (middlewares[middlewareName]) {
-            return middlewares[middlewareName]
+            return middlewares[middlewareName];
         }
 
         if (!this[kMiddlewares]['named'][middleware])
-            throw new MethodNotAvailable('middleware [{' + middleware + '}] is not available')
+            throw new MethodNotAvailable('middleware [{' + middleware + '}] is not available');
+
         if (!middlewares[middlewareName]) {
-            let namedMiddleware = this[kMiddlewares]['named'][middleware]
+            let namedMiddleware = this[kMiddlewares]['named'][middleware];
             if (!Array.isArray(namedMiddleware)) {
 
-                middlewares[middlewareName] = this.resolveMiddleware(namedMiddleware, params)
+                middlewares[middlewareName] = this.resolveMiddleware(namedMiddleware, params);
 
             } else {
                 middlewares[middlewareName] = this[kMiddlewares]['named'][middleware].map(handler => {
                     if (handler instanceof Array)
                         return handler.reduce((acc, val) => acc.concat(val), [])
                     return handler
-                }).map(handler => {
-
-                    return this.resolveMiddleware(handler, params)
-                }).filter(data => data);
+                }).map(handler => this.resolveMiddleware(handler, params)).filter(fn => fn);
             }
-
         }
-        return middlewares[middlewareName]
+        return middlewares[middlewareName];
     }
 
     resolveMiddleware(handler, params) {
-
         if (IsClass(handler)) {
-            handler.prototype.$app = this.$app
-            handler = new handler(...params)
+            handler.prototype.$app = this.$app;
+            handler = new handler(...params);
         }
         if (typeof handler == 'object' && !Array.isArray(handler)) {
             if (typeof handler.handle == 'function') {
-                return handler.handle.bind(handler)
-
+                handler.handle = handler.handle.bind(handler);
             }
-        } else {
-            return handler
+            if (typeof handler.terminate == 'function') {
+                handler.terminate = handler.terminate.bind(handler);
+            }
+            return handler;
+        } else if (handler) {
+            return { handle: handler };
         }
     }
 
     createLayer(stack) {
-        const self = this
-
         if (typeof stack.handle == 'string') {
             let [controller, callback] = stack.handle.split('::')
             let controllerPath = path.normalize(path.join(path.resolve(stack.namespace), controller))
             if (!controllers[controllerPath]) {
-                let clazz = require(controllerPath)
+                let clazz = require(controllerPath);
                 if (IsClass(clazz)) {
-                    clazz.prototype.$app = this.$app
-                    clazz = new clazz(stack.defaults)
+                    clazz.prototype.$app = this.$app;
+                    clazz = new clazz(stack.defaults);
                 }
-                controllers[controllerPath] = clazz
+                controllers[controllerPath] = clazz;
             }
             if (callback && !controllers[controllerPath][callback]) {
-                throw new MethodNotAvailable(`Specified [{${callback}}] method was not available in [{${controllerPath}}]`)
+                throw new MethodNotAvailable(`Specified [{${callback}}] method was not available in [{${controllerPath}}]`);
             }
-            stack.handle = controllers[controllerPath][callback].bind(controllers[controllerPath])
+            stack.handle = controllers[controllerPath][callback].bind(controllers[controllerPath]);
 
         } else if (Array.isArray(stack.handle)) {
-            let [controller, callback] = stack.handle
-            controller.prototype.$app = this.$app
-            controller = new controller(stack.defaults)
-            stack.handle = controller[callback].bind(controller)
+            let [controller, callback] = stack.handle;
+            controller.prototype.$app = this.$app;
+            controller = new controller(stack.defaults);
+            stack.handle = controller[callback].bind(controller);
         } else {
             if (IsClass(stack.handle)) {
-                stack.handle.prototype.$app = this.$app
-                stack.handle = new stack.handle(stack.defaults)
+                stack.handle.prototype.$app = this.$app;
+                stack.handle = new stack.handle(stack.defaults);
             }
             if (typeof stack.handle == 'object') {
-                let callback = 'handle'
+                let callback = 'handle';
                 if (callback && !stack.handle[callback]) {
-                    throw new MethodNotAvailable(`Specified [{${callback}}] method was not available`)
+                    throw new MethodNotAvailable(`Specified [{${callback}}] method was not available`);
                 }
-                stack.handle = stack.handle[callback].bind(stack.handle)
+                stack.handle = stack.handle[callback].bind(stack.handle);
             }
         }
         let middlewares = stack.middlewares.map(middleware => this.getMiddleware(middleware)).reduce((acc, val) => acc.concat(val), []);
-        middlewares.push(stack.handle)
-        let url = urlNormalize('/', stack.prefix, stack.url, stack.suffix).replace(/^\/|\/$/g, '')
+        middlewares.push({ handle: stack.handle });
+        let url = urlNormalize('/', stack.prefix, stack.url, stack.suffix).replace(/^\/|\/$/g, '');
+        const middlewareHandels = middlewares.map(middleware => middleware.handle).filter(fn => fn);
+        const middlewareTerminates = middlewares.map(middleware => middleware.terminate).filter(fn => fn);
         return new Layer({
             url: '/' + url,
             methods: stack.methods,
             name: stack.name,
             domain: stack.domain,
-            handle: compose(middlewares),
+            handle: compose(middlewareHandels),
+            terminate: middlewareTerminates,
 
         }, {
             sensitive: this[kRegexConfig]['sensitive'] || false,
@@ -333,86 +323,108 @@ class Router extends Macroable.extend(RouterContract) {
     }
 
     namedMiddleware(key, value) {
-        this[kMiddlewares]['named'][key] = value
+        this[kMiddlewares]['named'][key] = value;
     }
 
     defaultMiddlewares(middlewares = []) {
-        this[kMiddlewares]['default'] = this[kMiddlewares]['default'].concat(middlewares)
+        this[kMiddlewares]['default'] = this[kMiddlewares]['default'].concat(middlewares);
     }
 
-    registerDefaultMiddleware() {
+    resolveDefaultMiddleware() {
         if (this[kMiddlewares]['default'] instanceof Array) {
             return this[kMiddlewares]['default'].map(middleware => {
                 if (typeof middleware == 'string') {
-                    middleware = require(path.normalize(middleware))
+                    middleware = require(path.normalize(middleware));
                 }
                 if (IsClass(middleware)) {
-                    if (typeof middleware.prototype.handle != 'function') {
-                        middleware.prototype.handle = function({},
-                            next
-                        ) {
-                            next()
-                        }
+                    if (middlewares[middleware]) {
+                        return middlewares[middleware];
                     }
-                    if (!middlewares[middleware]) {
-                        middleware.prototype.$app = this.$app
+                    middleware.prototype.$app = this.$app;
+                    middlewares[middleware] = middleware = new middleware();
 
-                        middlewares[middleware] = new middleware()
+                    if (typeof middleware.handle == 'function') {
+                        middleware.handle = middleware.handle.bind(middleware);
                     }
-                    middleware = middlewares[middleware]
-                    let handle = middleware.handle.bind(middleware)
-                    Object.defineProperty(handle, "name", {
-                        value: middleware.constructor.name
-                    });
-                    middleware = handle
+                    if (typeof middleware.terminate == 'function') {
+                        middleware.terminate = middleware.terminate.bind(middleware);
+                    }
                 }
-                return middleware
+                return middleware;
             })
         }
         return []
     }
 
     httpContextHandler(httpContext) {
-        this.httpContext = httpContext
+        this.httpContext = httpContext;
     }
 
     handle() {
-        this[kLayers] = stacks.filter(stack => stack.handle).map(stack => this.createLayer(stack))
-        let self = this
-        let middlewares = [function urlHander({ request, response }, next) {
+        const defaultTermicateMiddleWare = {};
+        this[kLayers] = stacks.filter(stack => stack.handle).map(stack => this.createLayer(stack));
+        let self = this;
+        let middlewares = [function urlHander({ request }, next) {
             if (typeof request._parsedUrl != 'object') {
-                request._parsedUrl = url.parse(request.url, false)
+                request._parsedUrl = url.parse(request.url, false);
             }
-            next()
-        }]
-        middlewares = middlewares.concat(this.registerDefaultMiddleware())
-        middlewares.push(function layerHandler(ctx, next) {
+            next();
+        }];
+        const defaultMiddleare = this.resolveDefaultMiddleware();
+        const defaultHandleMiddleWares = defaultMiddleare.map(middleware => middleware.handle).filter(fn => fn);
+        let defaultTerminateMiddleWares = defaultMiddleare.map(middleware => middleware.terminate).filter(fn => fn);
+        middlewares = middlewares.concat(defaultHandleMiddleWares);
+        middlewares.push(async function layerHandler(ctx, next) {
 
             let layer = self[kLayers].find(route => {
                 if (route.$domain != undefined && ctx.request.headers.host != route.$domain)
                     return false
-                return (route.match(ctx.request._parsedUrl.pathname) && (route.$methods.indexOf(ctx.request.method) > -1))
+                return (route.match(ctx.request._parsedUrl.pathname) && (route.$methods.indexOf(ctx.request.method) > -1));
             })
             if (layer) {
-                layer.handle_request(ctx, next)
+                await layer.handle_request(ctx, next);
             } else {
-                next(new PageNotFoundException())
+                return next(new PageNotFoundException());
             }
+            if (!defaultTermicateMiddleWare[layer.$regexp]) {
+                const terminateMiddlewares = defaultTerminateMiddleWares.concat(layer.terminate);
+                const errorHandlerTerminate = terminateMiddlewares.find(handle => handle.length == 3);
+                defaultTermicateMiddleWare[layer.$regexp] =
+                    defaultTermicateMiddleWare[layer.$regexp] = {
+                        terminate: compose(terminateMiddlewares.filter(handle => handle.length < 3)),
+                        error: function (err) {
+                            if (err) {
+                                errorHandlerTerminate(err, ctx)
+                            }
+                        }
+                    };
+            }
+            defaultTermicateMiddleWare[layer.$regexp].terminate(ctx, defaultTermicateMiddleWare[layer.$regexp].error);
+
 
         })
-        let exceptionHandler = new ExceptionHandler()
-        exceptionHandler = exceptionHandler.handle.bind(ExceptionHandler)
+        let exceptionHandler = new ExceptionHandler();
+        let exceptionHandle = exceptionHandler.handle.bind(ExceptionHandler);
+        let exceptionTerminate = exceptionHandler.terminate.bind(ExceptionHandler);
         Object.defineProperty(exceptionHandler, "name", {
             value: ExceptionHandler.name
         });
         middlewares = middlewares.filter(handler => {
             if (handler.length == 3) {
-                exceptionHandler = handler
+                exceptionHandle = handler
                 return false
             }
             return true
-        })
-        middlewares.push(exceptionHandler)
+        });
+        defaultTerminateMiddleWares = defaultTerminateMiddleWares.filter(handler => {
+            if (handler.length == 3) {
+                exceptionTerminate = handler
+                return false
+            }
+            return true
+        });
+        middlewares.push(exceptionHandle);
+        defaultTerminateMiddleWares.push(exceptionTerminate);
         global.route = (name, params) => {
             return this.route(name, params)
         }
@@ -422,41 +434,38 @@ class Router extends Macroable.extend(RouterContract) {
 
     route(name, ...params) {
 
-        let currentRoute = this[kLayers].find(layer => (layer.$name == name && name != ''))
+        let currentRoute = this[kLayers].find(layer => (layer.$name == name && name != ''));
         if (!currentRoute) {
-            throw new InvalidRouteExceptions('Route name [{' + name + '}] not found')
+            throw new InvalidRouteExceptions('Route name [{' + name + '}] not found');
         }
-        let currentRouteParams = (currentRoute.$keys || [])
+        let currentRouteParams = (currentRoute.$keys || []);
         if (currentRouteParams.length && currentRouteParams.length != params.length) {
-            throw new InvalidArgumentException('Invalid Route params in [' + name + ']')
+            throw new InvalidArgumentException('Invalid Route params in [' + name + ']');
         }
         let mParams = {}
         for (let i = 0; i < currentRouteParams.length; i++) {
-            mParams[currentRouteParams[i]['name']] = params[i]
+            mParams[currentRouteParams[i]['name']] = params[i];
         }
-        return pathToRegexp.compile(currentRoute.$original, { encode: encodeURIComponent })(mParams, { validate: false })
+        return pathToRegexp.compile(currentRoute.$original, { encode: encodeURIComponent })(mParams, { validate: false });
     }
 
     currentRoute(request) {
         return this[kLayers].find(route => {
             if (route.$domain != undefined && request.headers.host != route.$domain)
-                return false
-            return (route.match(request._parsedUrl.pathname) && (route.$methods.indexOf(request.method) > -1))
+                return false;
+            return (route.match(request._parsedUrl.pathname) && (route.$methods.indexOf(request.method) > -1));
         })
     }
 
     bindToResponse(HttpResponse) {
         let self = this;
 
-        HttpResponse.prototype.route = function(name, params) {
-            this.redirect(self.route(name, params))
+        HttpResponse.prototype.route = function (name, params) {
+            this.redirect(self.route(name, params));
         };
     }
-
-
     __get(target, method) {
-        return this.make(new GroupRoute, method)
-
+        return this.make(new GroupRoute, method);
     }
 
 }

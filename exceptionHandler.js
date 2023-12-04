@@ -10,7 +10,11 @@ class ExceptionHandler {
         }
         error = process.env['NODE_ENV'] != 'production' ? error : 'Whoops, looks like something went wrong.';
         response.send(`<pre>${error}</pre>`, status);
-    };
+    }
+
+    terminate(error, { response }, next) {
+        console.error(error)
+    }
 }
 
 module.exports = ExceptionHandler
