@@ -1,6 +1,6 @@
 {
   "name": "@ostro/router",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Router module for OstroJS",
   "main": "router.js",
   "scripts": {
