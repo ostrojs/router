@@ -121,7 +121,7 @@ class Route {
     }
 
     namespace(namespace) {
-        this.$stack.namespace = this.$stack.namespace + (namespace || '');
+        this.$stack.namespace = path.join(this.$stack.namespace, (namespace || ''));
         return this;
     }
 
