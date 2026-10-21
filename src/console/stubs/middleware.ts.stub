@@ -1,0 +1,8 @@
+class {{ class }} {
+
+    public handle({ request, response, next }: any) {
+        next();
+    }
+}
+
+export default {{ class }};
