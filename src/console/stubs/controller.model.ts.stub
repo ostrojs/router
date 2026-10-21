@@ -1,0 +1,35 @@
+import Controller from '~/app/http/controllers/controller';
+import {{modelVariable}} from '{{namespacedModel}}';
+
+class {{ class }} extends Controller {
+
+    public index({ request, response }: any) {
+        //
+    }
+
+    public create({ request, response }: any) {
+        //
+    }
+
+    public store({ request, response }: any) {
+        //
+    }
+
+    public show({ request, response }: any) {
+        //
+    }
+
+    public edit({ request, response }: any) {
+        //
+    }
+
+    public update({ request, response }: any) {
+        //
+    }
+
+    public destroy({ request, response }: any) {
+        //
+    }
+}
+
+export default {{ class }};

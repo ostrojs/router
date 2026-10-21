@@ -1,0 +1,7 @@
+import Controller from '~/app/http/controllers/controller';
+
+class {{ class }} extends Controller {
+    //
+}
+
+export default {{ class }};
