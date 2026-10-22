@@ -1,19 +1,19 @@
 {
     "name": "@ostro/router",
-    "version": "2.0.0-alpha.1",
+    "version": "2.0.0-alpha.2",
     "description": "Router module for OstroJS",
     "main": "build/router.js",
-    "types": "build/router.d.ts",
+    "types": "./build/types/router.d.ts",
     "files": [
         "build"
     ],
     "exports": {
         ".": {
-            "types": "./build/router.d.ts",
+            "types": "./build/types/router.d.ts",
             "default": "./build/router.js"
         },
         "./*": {
-            "types": "./build/*.d.ts",
+            "types": "./build/types/*.d.ts",
             "default": "./build/*.js"
         }
     },
@@ -24,11 +24,11 @@
         "clean": "rm -rf build coverage"
     },
     "dependencies": {
-        "@ostro/cache": "^2.0.0-alpha.1",
-        "@ostro/console": "^2.0.0-alpha.1",
-        "@ostro/contracts": "^2.0.0-alpha.1",
-        "@ostro/http": "^2.0.0-alpha.1",
-        "@ostro/support": "^2.0.0-alpha.1",
+        "@ostro/cache": "^2.0.0-alpha.2",
+        "@ostro/console": "^2.0.0-alpha.2",
+        "@ostro/contracts": "^2.0.0-alpha.2",
+        "@ostro/http": "^2.0.0-alpha.2",
+        "@ostro/support": "^2.0.0-alpha.2",
         "array-flatten": "^3.0.0",
         "lodash.difference": "^4.5.0",
         "path-to-regexp": "^6.2.0"
