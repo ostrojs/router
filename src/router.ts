@@ -473,6 +473,8 @@ class Router extends (Macroable.extend(RouterContract) as any) implements IRoute
     public declare match: (methods: string[], uri: string, action?: any) => any;
     public declare prefix: (prefix: string) => this;
     public declare middleware: (...middlewares: any[]) => this;
+    public declare namespace: (namespace: string) => this;
+    public declare group: (attributes: any, callback?: any) => this;
     public declare dispatch: (request: any, response: any) => Promise<any>;
 
     public $app: Record<string, any>;
