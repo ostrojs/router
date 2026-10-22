@@ -30,16 +30,6 @@ export default {
         ]
     },
     "moduleNameMapper": {
-        "^@ostro/support/(.*)$": "<rootDir>/../support/src/$1",
-        "^@ostro/support$": "<rootDir>/../support/src",
-        "^@ostro/contracts/(.*)$": "<rootDir>/../contracts/src/$1",
-        "^@ostro/contracts$": "<rootDir>/../contracts/src",
-        "^@ostro/console/(.*)$": "<rootDir>/../console/src/$1",
-        "^@ostro/console$": "<rootDir>/../console/src/application",
-        "^@ostro/http/(.*)$": "<rootDir>/../http/src/$1",
-        "^@ostro/http$": "<rootDir>/../http/src/index",
-        "^@ostro/cache/(.*)$": "<rootDir>/../cache/src/$1",
-        "^@ostro/cache$": "<rootDir>/../cache/src",
         "^@ostro/router/(.*)$": "<rootDir>/src/$1",
         "^@ostro/router$": "<rootDir>/src/router"
     },
