@@ -1,8 +1,8 @@
-import '@ostro/support/helpers';
 import path from 'path';
 import GeneratorCommand from '@ostro/console/generatorCommand';
 import InvalidArgumentException from '@ostro/support/exceptions/invalidArgumentException';
 import { trim, class_basename } from '@ostro/support/function';
+import { replaceAllArray, ucfirst } from '@ostro/support/string';
 
 /**
  * Console command for generating new controller classes.
@@ -86,7 +86,7 @@ class ControllerMakeCommand extends GeneratorCommand {
             $replace = await this.buildModelReplacements($replace);
         }
 
-        return super.buildClass($name).then((content: any) => content.replaceAllArray(Object.keys($replace), Object.values($replace)));
+        return super.buildClass($name).then((content: any) => replaceAllArray(content, Object.keys($replace), Object.values($replace)));
     }
 
     /**
@@ -106,16 +106,18 @@ class ControllerMakeCommand extends GeneratorCommand {
             }
         }
         $modelClass = trim($modelClass.replace(this.rootNamespace(), '~').replaceAll('\\', '/'), '/');
+        const baseModel = class_basename($modelClass);
+        const modelVar = ucfirst(baseModel);
         return Object.assign($replace, {
             'DummyFullModelClass': $modelClass,
             '{{ namespacedModel }}': $modelClass,
             '{{namespacedModel}}': $modelClass,
-            'DummyModelClass': class_basename($modelClass),
-            '{{ model }}': class_basename($modelClass),
-            '{{model}}': class_basename($modelClass),
-            'DummyModelVariable': (class_basename($modelClass) as any).ucfirst(),
-            '{{ modelVariable }}': (class_basename($modelClass) as any).ucfirst(),
-            '{{modelVariable}}': (class_basename($modelClass) as any).ucfirst(),
+            'DummyModelClass': baseModel,
+            '{{ model }}': baseModel,
+            '{{model}}': baseModel,
+            'DummyModelVariable': modelVar,
+            '{{ modelVariable }}': modelVar,
+            '{{modelVariable}}': modelVar,
         });
     }
 
