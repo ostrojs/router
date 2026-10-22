@@ -1,4 +1,3 @@
-import '@ostro/support/helpers';
 import RouterContract, { type IRouter } from '@ostro/contracts/router/router';
 import path from 'path';
 import fs from 'fs';
