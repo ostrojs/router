@@ -1,6 +1,6 @@
 {
     "name": "@ostro/router",
-    "version": "2.0.0-alpha.2",
+    "version": "2.0.0-alpha.3",
     "description": "Router module for OstroJS",
     "main": "build/router.js",
     "types": "./build/types/router.d.ts",

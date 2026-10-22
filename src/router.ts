@@ -74,13 +74,18 @@ function resolveModule(modPath: string): any {
                 userOutDir = userOutDir || '.dist';
                 const distCandidate: string = path.join(cwd, userOutDir, rel);
                 const buildCandidate: string = path.join(cwd, 'build', rel);
+                const srcCandidate: string = path.join(cwd, 'src', rel);
                 try {
                     mod = require(distCandidate);
                 } catch {
                     try {
                         mod = require(buildCandidate);
                     } catch {
-                        throw err;
+                        try {
+                            mod = require(srcCandidate);
+                        } catch {
+                            throw err;
+                        }
                     }
                 }
             } else {
