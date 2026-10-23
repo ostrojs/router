@@ -1,20 +1,17 @@
 {
     "name": "@ostro/router",
-    "version": "2.0.0-alpha.6",
+    "version": "2.0.0-alpha.7",
     "description": "Router module for OstroJS",
-    "main": "build/router.js",
-    "types": "./build/types/router.d.ts",
-    "files": [
-        "build"
-    ],
+    "main": "router.js",
+    "types": "types/router.d.ts",
     "exports": {
         ".": {
-            "types": "./build/types/router.d.ts",
-            "default": "./build/router.js"
+            "types": "./types/router.d.ts",
+            "default": "./router.js"
         },
         "./*": {
-            "types": "./build/types/*.d.ts",
-            "default": "./build/*.js"
+            "types": "./types/*.d.ts",
+            "default": "./*.js"
         }
     },
     "scripts": {
@@ -25,11 +22,11 @@
         "lint:check": "tsc --noEmit -p tsconfig.build.json"
     },
     "dependencies": {
-        "@ostro/cache": "^2.0.0-alpha.4",
-        "@ostro/console": "^2.0.0-alpha.6",
-        "@ostro/contracts": "^2.0.0-alpha.5",
-        "@ostro/http": "^2.0.0-alpha.5",
-        "@ostro/support": "^2.0.0-alpha.6",
+        "@ostro/cache": "^2.0.0-alpha.5",
+        "@ostro/console": "^2.0.0-alpha.7",
+        "@ostro/contracts": "^2.0.0-alpha.6",
+        "@ostro/http": "^2.0.0-alpha.6",
+        "@ostro/support": "^2.0.0-alpha.7",
         "array-flatten": "^3.0.0",
         "path-to-regexp": "^6.2.0"
     },
@@ -59,7 +56,7 @@
         "jest": "^30.5.2",
         "ts-jest": "^29.4.15",
         "ts-node": "^10.9.2",
-        "@ostro/builder": "^2.0.0-alpha.3"
+        "@ostro/builder": "^2.0.0-alpha.4"
     },
     "overrides": {
         "sprintf-js": "^1.1.3",
