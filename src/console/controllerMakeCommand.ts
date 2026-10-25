@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 import GeneratorCommand from '@ostro/console/generatorCommand';
 import InvalidArgumentException from '@ostro/support/exceptions/invalidArgumentException';
 import { trim, class_basename } from '@ostro/support/function';

@@ -1,5 +1,6 @@
-import path from 'path';
-import fs from 'fs';
+import { describe, test, expect, beforeEach, jest } from "@jest/globals";
+import path from 'node:path';
+import fs from 'node:fs';
 import ControllerMakeCommand from '../src/console/controllerMakeCommand';
 import MiddlewareMakeCommand from '../src/console/middlewareMakeCommand';
 import InvalidArgumentException from '@ostro/support/exceptions/invalidArgumentException';

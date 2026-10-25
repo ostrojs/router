@@ -35,14 +35,14 @@ interface LayerInstance {
     $path?: string;
     $regexp: RegExpWithFlags;
     $keys: Key[];
-    $params?: Record<string, any>;
+    $params?: Key[] | Record<string, any>;
     handle_error(error: any, ctx: any, next: Function): any;
     handle_request(ctx: any, next: Function): any;
     match(path: string | null | undefined): boolean;
 }
 
 interface LayerConstructor {
-    new (stack: LayerStack, opts?: LayerOptions): LayerInstance;
+    new(stack: LayerStack, opts?: LayerOptions): LayerInstance;
     (stack: LayerStack, opts?: LayerOptions): LayerInstance;
     prototype: LayerInstance;
 }
@@ -55,8 +55,9 @@ interface LayerConstructor {
  */
 function Layer(this: any, stack: LayerStack, opts: LayerOptions = {}): LayerInstance {
     const self: any = this;
-    if (!(self instanceof (Layer as any))) {
-        return new (Layer as any)(stack, opts);
+    const LayerCtor: any = Layer;
+    if (!(self instanceof LayerCtor)) {
+        return new LayerCtor(stack, opts);
     }
 
     self.handle = stack.handle;
@@ -67,7 +68,7 @@ function Layer(this: any, stack: LayerStack, opts: LayerOptions = {}): LayerInst
     self.$methods = stack.methods;
     self.$path = undefined;
     self.$regexp = pathToRegexp(stack.url, (self.$keys = []), opts) as RegExpWithFlags;
-    self.$params = self.$keys as any;
+    self.$params = self.$keys;
     self.$regexp.fast_star = stack.url === '*';
     self.$regexp.fast_slash = stack.url === '/' && opts.end === false;
     return self;
@@ -167,6 +168,6 @@ Layer.prototype.match = function (path: string | null | undefined): boolean {
     return true;
 };
 
-const ExportedLayer: LayerConstructor = Layer as unknown as LayerConstructor;
+const ExportedLayer: LayerConstructor = Layer as LayerConstructor;
 
 export default ExportedLayer;

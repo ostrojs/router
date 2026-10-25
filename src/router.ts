@@ -1,15 +1,15 @@
 import RouterContract, { type IRouter } from '@ostro/contracts/router/router';
-import path from 'path';
-import fs from 'fs';
+import path from 'node:path';
+import fs from 'node:fs';
 import MethodNotAvailable from '@ostro/support/exceptions/methodNotAvailable';
 import PageNotFoundException from '@ostro/support/exceptions/pageNotFoundException';
 import InvalidArgumentException from '@ostro/support/exceptions/invalidArgumentException';
 import InvalidRouteExceptions from './exceptions/invalidRouteExceptions';
-import { Macroable } from '@ostro/support/macro';
+import { Macroable, ProxyHandler } from '@ostro/support/macro';
 import Layer from './layer';
 import { compose, composeWith, urlNormalize } from './utils';
 import * as pathToRegexp from 'path-to-regexp';
-import url from 'url';
+import url from 'node:url';
 import HttpContext from './httpContext';
 import ExceptionHandler from './exceptionHandler';
 import ViewController from './viewController';
@@ -67,7 +67,7 @@ function resolveModule(modPath: string): any {
                                     userOutDir = parsed.compilerOptions.outDir.replace(/^\.[/\\]/, '');
                                     break;
                                 }
-                            } catch (_) {}
+                            } catch (_) { }
                         }
                     }
                 }
@@ -95,7 +95,13 @@ function resolveModule(modPath: string): any {
             throw err;
         }
     }
-    return (mod && (mod.__esModule || mod.default) && mod.default) ? mod.default : mod;
+    if (mod && mod.__esModule && mod.default) {
+        return mod.default;
+    }
+    if (mod && Object.prototype.hasOwnProperty.call(mod, 'default') && mod.default && !IsClass(mod)) {
+        return mod.default;
+    }
+    return mod;
 }
 
 /**
@@ -123,11 +129,11 @@ class Route {
      * @param opt - Route configuration options.
      */
     constructor(opt: Record<string, any> = {}) {
-        opt = Object.assign({ prefix: '/', suffix: '/', namespace: '', middlewares: [], url: '/', name: '', handle: null, defaults: null }, opt);
+        opt = Object.assign({ prefix: '/', suffix: '', namespace: '', middlewares: [], url: '/', name: '', handle: null, defaults: null }, opt);
 
         this.$currentStack = stacks.push({
             prefix: opt.prefix,
-            suffix: opt.suffix,
+            suffix: opt.suffix || '',
             namespace: opt.namespace,
             middlewares: [...(opt.middlewares || [])],
             url: opt.url,
@@ -416,11 +422,11 @@ class GroupRoute extends Macroable {
         if (opt == null && old == null) {
             return this;
         }
-        opt = Object.assign({ prefix: '/', suffix: '/', namespace: '', middleware: [], url: '/', name: '', handle: null, defaults: null }, opt);
-        old = Object.assign({ prefix: '/', suffix: '/', namespace: '', middlewares: [], url: '/', name: '', handle: null, defaults: null }, old);
+        opt = Object.assign({ prefix: '/', suffix: '', namespace: '', middleware: [], url: '/', name: '', handle: null, defaults: null }, opt);
+        old = Object.assign({ prefix: '/', suffix: '', namespace: '', middlewares: [], url: '/', name: '', handle: null, defaults: null }, old);
 
         this.opt.prefix = old.prefix + opt.prefix;
-        this.opt.suffix = old.suffix + opt.suffix;
+        this.opt.suffix = (old.suffix || '') + (opt.suffix || '');
         this.opt.namespace = opt.namespace ? path.join(old.namespace, opt.namespace) : old.namespace;
         this.opt.middlewares = old.middlewares.concat(opt.middleware);
         this.opt.url = old.url + opt.url;
@@ -459,14 +465,14 @@ class GroupRoute extends Macroable {
      * @returns Delegated method handler.
      */
     public __get(target: Record<string, any>, method: string): any {
-        return (this as any).make(new Route(target.opt), method);
+        return ProxyHandler.make(new Route(target.opt), method);
     }
 }
 
 /**
  * Main HTTP Router class handling registration, resolution, middleware execution, and dispatching.
  */
-class Router extends (Macroable.extend(RouterContract) as any) implements IRouter {
+class Router extends Macroable.extend(RouterContract) implements IRouter {
     public declare get: (uri: string, action?: any) => any;
     public declare post: (uri: string, action?: any) => any;
     public declare put: (uri: string, action?: any) => any;
@@ -618,7 +624,8 @@ class Router extends (Macroable.extend(RouterContract) as any) implements IRoute
         }
         const resolvedMiddlewares: any[] = stack.middlewares.map((middleware: any) => this.getMiddleware(middleware)).reduce((acc: any[], val: any) => acc.concat(val), []);
         resolvedMiddlewares.push({ handle: stack.handle });
-        const normalizedUrl: string = urlNormalize('/', stack.prefix, stack.url, stack.suffix).replace(/^\/|\/$/g, '');
+        const normalizedPath: string = urlNormalize('/', stack.prefix, stack.url).replace(/^\/|\/$/g, '');
+        const normalizedUrl: string = normalizedPath + (stack.suffix ? stack.suffix : '');
         const middlewareHandels: Function[] = resolvedMiddlewares.map((middleware: any) => middleware.handle).filter((fn: any) => fn);
         const middlewareTerminates: Function[] = resolvedMiddlewares.map((middleware: any) => middleware.terminate).filter((fn: any) => fn);
         return new Layer({
@@ -767,7 +774,7 @@ class Router extends (Macroable.extend(RouterContract) as any) implements IRoute
         });
         middlewaresList.push(exceptionHandle);
         defaultTerminateMiddleWares.push(exceptionTerminate);
-        (global as any).route = (name: string, params: any): any => {
+        (global as typeof globalThis).route = (name: string, params: unknown): unknown => {
             return this.route(name, params);
         };
         return composeWith(middlewaresList)(this.httpContext);
@@ -793,7 +800,8 @@ class Router extends (Macroable.extend(RouterContract) as any) implements IRoute
         for (let i = 0; i < currentRouteParams.length; i++) {
             mParams[currentRouteParams[i]['name']] = params[i];
         }
-        return (pathToRegexp.compile(currentRoute.$original, { encode: encodeURIComponent }) as any)(mParams, { validate: false });
+        const toPath = pathToRegexp.compile(currentRoute.$original, { encode: encodeURIComponent });
+        return toPath(mParams);
     }
 
     /**
@@ -832,7 +840,7 @@ class Router extends (Macroable.extend(RouterContract) as any) implements IRoute
      * @returns Delegated method handler.
      */
     public __get(target: Record<string, any>, method: string): any {
-        return (this as any).make(new GroupRoute(), method);
+        return ProxyHandler.make(new GroupRoute(), method);
     }
 
     /**

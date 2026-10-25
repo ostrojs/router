@@ -12,7 +12,7 @@ class ExceptionHandler {
     public handle(error: any, { response }: Record<string, any>, next?: Function): void {
         let status: number = 500;
         if (error instanceof Error) {
-            status = (error as any).status || 500;
+            status = (error as Error & { status?: number }).status || 500;
             error = error.stack;
         } else if (typeof error === 'object') {
             status = error.status || 500;

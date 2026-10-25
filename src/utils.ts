@@ -46,7 +46,7 @@ export function decode_param(val: any): any {
     } catch (err: any) {
         if (err instanceof URIError) {
             err.message = 'Failed to decode param \'' + val + '\'';
-            (err as any).status = (err as any).statusCode = 400;
+            (err as Error & { status?: number; statusCode?: number }).status = (err as Error & { status?: number; statusCode?: number }).statusCode = 400;
         }
 
         throw err;
