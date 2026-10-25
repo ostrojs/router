@@ -25,10 +25,15 @@ export default {
         "^.+\\.ts$": [
             tsJestPath,
             {
-                "tsconfig": "<rootDir>/tsconfig.json"
+                "tsconfig": "<rootDir>/tsconfig.json",
+                "isolatedModules": true,
+                "diagnostics": false
             }
         ]
     },
+    "modulePathIgnorePatterns": [
+        "<rootDir>/build/"
+    ],
     "moduleNameMapper": {
         "^@ostro/router/(.*)$": "<rootDir>/src/$1",
         "^@ostro/router$": "<rootDir>/src/router"
