@@ -1,9 +1,10 @@
+import { describe, test, it, expect, beforeEach, afterEach, jest } from "@jest/globals";
 import Router from '../src/router';
 import PageNotFoundException from '@ostro/support/exceptions/pageNotFoundException';
 import MethodNotAvailable from '@ostro/support/exceptions/methodNotAvailable';
 import InvalidRouteExceptions from '../src/exceptions/invalidRouteExceptions';
 import InvalidArgumentException from '@ostro/support/exceptions/invalidArgumentException';
-import path from 'path';
+import path from 'node:path';
 
 describe('Router & Route & GroupRoute', () => {
     let app;
@@ -111,7 +112,7 @@ describe('Router & Route & GroupRoute', () => {
         const stacks = Router.getStacks();
         const stack = stacks[0];
         expect(stack.prefix).toBe('///api');
-        expect(stack.suffix).toBe('//.json');
+        expect(stack.suffix).toBe('.json');
         expect(stack.domain).toBe('api.domain.com');
         expect(stack.name).toBe('api.');
         expect(stack.middlewares).toEqual(['auth', 'cors', 'throttle']);

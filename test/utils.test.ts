@@ -1,3 +1,4 @@
+import { describe, test, expect } from "@jest/globals";
 import { compose, composeWith, decode_param, urlNormalize } from '../src/utils';
 
 describe('Router Utils', () => {
